@@ -1,0 +1,10 @@
+---
+title: "tiding and wrangling"
+format: html
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
