@@ -1,0 +1,76 @@
+---
+title: "Introduction to Quarto"
+format: html
+---
+
+# Intro
+
+## About the data
+
+-Water sample data from arctic Ocean
+
+-Data downladed for Arctic Data Center [Tweedi ADC data](https://arcticdata.io/catalog/view/doi:10.18739/A25T3FZ8X)
+
+## Set up
+
+```{r}
+#| warning: false
+library(readr)
+library(here)
+```
+
+## read in the data
+
+
+```{r}
+#| warning: false
+bg_chem <- read_csv(here("data/BGchem2008data.csv"))
+```
+
+# Analysis
+
+## Calculate sats
+```{r}
+# print colum names
+colnames(bg_chem)
+
+# show data structure
+str(bg_chem)
+
+# first bit of the data
+head(bg_chem)
+
+#summary of each colum
+
+summary(bg_chem)
+
+# get unicq valuse
+unique(bg_chem$Date)
+```
+
+
+## Calculate mean
+```{r}
+#calulate some means
+nitrate <- mean(bg_chem$NO3)
+
+nitrite <- mean(bg_chem$NO2)
+
+amm <- mean(bg_chem$NH4)
+
+phos <- mean(bg_chem$P)
+```
+
+
+
+
+
+## Plot
+
+```{r}
+ratio <- (nitrate+nitrite+ amm)/ phos
+```
+
+Here is the ratio we calculated: `r round(ratio, 3)`
+
+#  Conclustion
