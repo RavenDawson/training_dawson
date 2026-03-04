@@ -5,7 +5,7 @@ format: html
 
 ## Course lessons
 
--   [intro to quarto]('scripts/into-quarto.html')
+-   [intro to quarto](scripts/into-quarto.html)
 -   into to get hub
 -   cleaning and wrangling
 
