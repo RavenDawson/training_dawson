@@ -2,3 +2,11 @@
 title: "Github Pages Example"
 format: html
 ---
+
+## Course lessons
+
+-   intro to quarto
+-   into to get hub
+-   cleaning and wrangling
+
+# practice
