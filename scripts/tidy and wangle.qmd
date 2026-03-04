@@ -4,7 +4,192 @@ format: html
 ---
 
 ```{r}
+#| message: false
 library(dplyr)
 library(tidyr)
+library(readr)
+```
+
+# Data Soures
+
+##Read in the data
+
+```{r}
+#| message: false
+catch_original <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+```
+
+## Expore
+
+```{r}
+colnames(catch_original)
+
+head(catch_original)
+
+summary(catch_original)
+
+unique(catch_original$Region)
+```
+
+Rstudio has a shortcut for %\>%
+
+ctr + shift + M
+
+#cheaning and reshaping
+
+##using select
+
+```{r}
+catch_data <- catch_original %>% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+head(catch_data)
+```
+
+##check colom types
+
+```{r}
+glimpse(catch_data)
+```
+
+#changeing colums with mutat
+
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook=as.numeric(Chinook))
+```
+
+## trying to isoate this issue
+
+```{r}
+is.na(catch_clean$Chinook)
+
+#get na valuse location
+
+i<- which(is.na(catch_clean$Chinook))
+catch_data[i,]
+
+#use mutat again
+
+catch_clean<-catch_data %>% 
+  mutate(Chinook=if_else(condition = Chinook == "I", 
+                         true = "1",
+                         false = Chinook),
+         Chinook = as.numeric(Chinook))
+head(catch_clean)
+
+```
+
+##changing the file shapes
+
+```{r}
+
+catch_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region, Year),
+               names_to = "species",
+               values_to = "catch")
+
+head(catch_long)
+
+
+catch_wide <- catch_long %>% 
+  pivot_wider(names_from = species, values_from = catch)
+
+
+```
+
+##rename the cols
+
+```{r}
+catch_long <- catch_long %>% 
+  rename(catch_thousands = catch)
+
+```
+
+##adding a new coloum
+
+```{r}
+catch_long<-catch_long %>% 
+  mutate(catch = catch_thousands*1000)
+
+```
+
+# Stats
+
+```{r}
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarise(mean_catch = mean(catch))
+
+n_region<- catch_clean %>% 
+  group_by(Region) %>%
+  summarise(n=n())
+```
+
+
+
+##filtering rows
+
+```{r}
+sse_catch<-catch_long %>% 
+  filter(Region == "SSE")
+
+catch_mill<- catch_long %>% 
+  filter(catch >= 1000000)
+
+sse_chinook<- catch_long %>% 
+  filter(Region=="SSE"& species=="Chinook")
+```
+
+##arange
+
+```{r}
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarise(mean_catch = mean(catch)) %>% 
+  arrange(mean_catch)
+
+
+
+```
+
+
+#combining datasets with join
+
+##new data
+```{r}
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+catch_join<-left_join(catch_long, region_defs, by = c("Region" = "code"))
+
+
+```
+
+
+## split and combine values
+
+```{r}
+
+sites_df<- data.frame(site=c("HSW-101", "HSW-201","OWS-301"))
+
+split_df<- sites_df %>% 
+  separate(site, c("island", "site_number"), sep = "-")
+
+data_df<-data.frame(year=c("1930", "1930", "1932"), 
+                    month=c("12","12","12"),
+                    day=c("14","15","16"))
+
+dates_df<-data_df %>% 
+  unite(col=data, year, month, day, sep="/")
+
+```
+
+
+#save our results
+
+```{r}
+
+library(here)
+write_csv(mean_region, here("data/mean_catch_by_regoin.csv"))
 ```
 
